@@ -1,6 +1,12 @@
 // Project data structure
 const projectData = {
-    about:[],
+    about:[{
+        title: "",
+        previewImage: "/images/door.jpg",
+        additionalImages: [
+        ],
+        description: ""
+    }],
     architecture: [
         {
             title: "Modulor: digital methods of representing human perception in spaces",
@@ -13,31 +19,42 @@ const projectData = {
             description: "Detailed description of architectural project 1. This can be a longer piece of text that appears on hover."
         },
         {
-            title: "Where is the Wind blowing from",
-            previewImage: "/api/placeholder/400/300",
+            title: "Where is the Wind blowing from?",
+            previewImage: "/images/l2.jpg",
             additionalImages: [
-                "/api/placeholder/400/300",
-                "/api/placeholder/400/300"
+                "/images/l1.jpg",
+                "/images/l2.jpg",
             ],
-            description: "LINE Pavillion Submission"
+            description: "<b>LINE Pavillion Submission</b> <br> A placemaking intervention seeking to create a moment of meditation and intervention."
         },
         {
             title: "A vision for the Ringroad in Tirana",
-            previewImage: "/api/placeholder/400/300",
+            previewImage: "/images/d3.jpg",
             additionalImages: [
-                "/api/placeholder/400/300",
-                "/api/placeholder/400/300"
+                "/images/d3.jpg",
+                "/images/d1.jpg",
+                "/images/d2.jpg",
+                "/images/d4.jpg",
             ],
-            description: "Thesis 2019"
+            description: "<b>Master Thesis</b><br> An endeavour to get cars out of sight."
         },
         {
             title: "Massing studies for a corner",
-            previewImage: "/api/placeholder/400/300",
+            previewImage: "/images/h2.jpg",
             additionalImages: [
-                "/api/placeholder/400/300",
-                "/api/placeholder/400/300"
+                "/images/h2.jpg",
+                "/images/h1.jpg",
             ],
-            description: "Detailed description of design work 2."
+            description: "<b>Massing studies for a corner</b>"
+        },
+        {
+            title: "Beehaviour pavillion",
+            previewImage: "/images/b3.jpg",
+            additionalImages: [
+                "/images/b1.jpg",
+                "/images/b2.jpg"
+            ],
+            description: "<b>Meds Workshop</b><br> Spetses"
         }
     ],
     design: [
@@ -48,7 +65,7 @@ const projectData = {
                 "/api/placeholder/400/300",
                 "/api/placeholder/400/300"
             ],
-            description: "3d printing"
+            description: "<b>3d printed PLA</b>"
         },
         {
             title: "Studies for a Lego Kit",
@@ -57,7 +74,7 @@ const projectData = {
                 "/api/placeholder/400/300",
                 "/api/placeholder/400/300"
             ],
-            description: "3d printing"
+            description: "<b>3d printed PLA</b>"
         },
         {
             title: "How to find time",
@@ -66,7 +83,7 @@ const projectData = {
                 "/api/placeholder/400/300",
                 "/api/placeholder/400/300"
             ],
-            description: "3d printing"
+            description: "<b>3d printed PLA</b>"
         },
         {
             title: "Time",
@@ -75,7 +92,7 @@ const projectData = {
                 "/api/placeholder/400/300",
                 "/api/placeholder/400/300"
             ],
-            description: "resin casting"
+            description: "<b>Resin casting on silicone mould</b><br>Created at Atelier La Juntana"
         },
         {
             title: "Untitled",
@@ -84,36 +101,61 @@ const projectData = {
                 "/api/placeholder/400/300",
                 "/api/placeholder/400/300"
             ],
-            description: "ceramic tiles"
+            description: "<b>Aluminum casting, glazed ceramic tiles</b><br>Created at Atelier La Juntana"
+        },
+        {
+            title: "Super Stable Table",
+            previewImage: "/images/z1.jpg",
+            additionalImages: [
+                "/images/z1.jpg",
+                "/images/z2.jpg",
+                "/images/z3.jpg",
+            ],
+            description: "<b>An attempt at cardboard furniture</b>"
         },
     ],
     purposeless: [
         {
             title: "DLA",
-            previewImage: "/api/placeholder/400/300",
+            previewImage: "/images/g1.gif",
             additionalImages: [
-                "/api/placeholder/400/300",
-                "/api/placeholder/400/300"
+                "/images/g1.gif",
+                "/images/g2.gif"
             ],
-            description: "Detailed description of purposeless exploration 1."
+            description: "<b>DLA algorithm exploration</b><br>Grasshopper, Python"
         },
         {
             title: "Folding",
-            previewImage: "/api/placeholder/400/300",
+            previewImage: "/images/k3.jpg",
             additionalImages: [
-                "/api/placeholder/400/300",
-                "/api/placeholder/400/300"
+                "/images/k1.jpg",
+                "/images/k2.jpg",
+                "/images/k3.jpg",
+                "/images/k5.jpg",
             ],
-            description: "Detailed description of purposeless exploration 2."
+            description: "<b>Paper fold explorations and light</b>"
         },
         {
             title: "Sun and Sea",
-            previewImage: "/api/placeholder/400/300",
+            previewImage: "/images/f1.jpg",
             additionalImages: [
-                "/api/placeholder/400/300",
-                "/api/placeholder/400/300"
+                "/images/f1.jpg",
+                "/images/f2.jpg",
+                "/images/f3.jpg",
+                "/images/f4.jpg",
+                "/images/f5.jpg",
+                "/images/f6.jpg",
             ],
-            description: "Detailed description of purposeless exploration 2."
+            description: "<b>Vacation photography<b/>"
+        },
+        {
+            title: "Opus",
+            previewImage: "/images/o1.jpg",
+            additionalImages: [
+                "/images/o1.jpg",
+                "/images/o2.jpg"
+            ],
+            description: "<b>Mini-sculpture</b>"
         }
     ],
     thoughts: [
@@ -184,8 +226,8 @@ function updateContent(category) {
             </div>
             <div class="hover-content">
                 <div class="additional-images">
-                    ${project.additionalImages.map(img => 
-                        `<img src="${img}" alt="Additional view of ${project.title}">`
+                    ${project.additionalImages.map((img, index) => 
+                        `<img src="${img}" alt="Additional view ${index + 1} of ${project.title}">`
                     ).join('')}
                 </div>
                 <p class="hover-description">${project.description}</p>
