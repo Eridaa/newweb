@@ -87,19 +87,19 @@ const projectData = {
         },
         {
             title: "Time",
-            previewImage: "/api/placeholder/400/300",
+            previewImage: "/images/t1.jpg",
             additionalImages: [
-                "/api/placeholder/400/300",
-                "/api/placeholder/400/300"
+                "/images/t2.jpg",
+                "/images/t3.jpg"
             ],
-            description: "<b>Resin casting on silicone mould</b><br>Created at Atelier La Juntana"
+            description: "<b>Resin casting on silicone mold</b><br>Created at Atelier La Juntana"
         },
         {
             title: "Untitled",
-            previewImage: "/api/placeholder/400/300",
+            previewImage: "/images/u1.jpg",
             additionalImages: [
-                "/api/placeholder/400/300",
-                "/api/placeholder/400/300"
+                "/images/u1.jpg",
+                "/images/u2.jpg"
             ],
             description: "<b>Aluminum casting, glazed ceramic tiles</b><br>Created at Atelier La Juntana"
         },
@@ -123,6 +123,14 @@ const projectData = {
                 "/images/g2.gif"
             ],
             description: "<b>DLA algorithm exploration</b><br>Grasshopper, Python"
+        },
+        {
+            title: "Floating Cities",
+            previewImage: "/images/gh.gif",
+            additionalImages: [
+                "/images/gh.gif"
+            ],
+            description: "<b>Floating Cities</b><br>Grasshopper"
         },
         {
             title: "Folding",
