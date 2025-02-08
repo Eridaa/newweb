@@ -73,7 +73,7 @@ body {
 
 .item-preview-image {
     width: 100%;
-    height: 20rem;
+    height: 200px;
     object-fit: cover;
     margin-bottom: 0.5rem;
 }
