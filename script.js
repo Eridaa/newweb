@@ -4,19 +4,18 @@ const projectData = {
         title: "",
         previewImage: "/images/door.jpg",
         additionalImages: [
+            "/images/door.jpg"
         ],
         description: ""
     }],
     architecture: [
         {
-            title: "Modulor: digital methods of representing human perception in spaces",
+            title: "Modulor: digital methods of representing human perception in spaces (SOON)",
             previewImage: "/api/placeholder/400/300",
             additionalImages: [
-                "/api/placeholder/400/300",
-                "/api/placeholder/400/300",
                 "/api/placeholder/400/300"
             ],
-            description: "Detailed description of architectural project 1. This can be a longer piece of text that appears on hover."
+            description: "I'm working on it!"
         },
         {
             title: "Where is the Wind blowing from?",
@@ -60,22 +59,22 @@ const projectData = {
     design: [
         {
             title: "A 'feminist' chess set",
-            previewImage: "/api/placeholder/400/300",
+            previewImage: "/images/ch1.jpg",
             additionalImages: [
-                "/api/placeholder/400/300",
-                "/api/placeholder/400/300"
+                "/images/ch2.jpg",
+                "/images/ch3.jpg"
             ],
             description: "<b>3d printed PLA</b>"
         },
         {
             title: "Studies for a Lego Kit",
-            previewImage: "/api/placeholder/400/300",
+            previewImage: "/images/le2.jpg",
             additionalImages: [
-                "/api/placeholder/400/300",
-                "/api/placeholder/400/300"
+                "/images/le1.jpg",
+                "/images/le2.jpg"
             ],
             description: "<b>3d printed PLA</b>"
-        },
+        },/*
         {
             title: "How to find time",
             previewImage: "/api/placeholder/400/300",
@@ -84,7 +83,7 @@ const projectData = {
                 "/api/placeholder/400/300"
             ],
             description: "<b>3d printed PLA</b>"
-        },
+        },*/
         {
             title: "Time",
             previewImage: "/images/t1.jpg",
@@ -168,40 +167,31 @@ const projectData = {
     ],
     thoughts: [
         {
-            title: "On architectural representations: how to design without drawing walls.",
+            title: "On architectural representations: how to design without drawing walls. (SOON)",
             previewImage: "/api/placeholder/400/300",
             additionalImages: [
                 "/api/placeholder/400/300",
                 "/api/placeholder/400/300"
             ],
-            description: "Detailed description of thought piece 1."
+            description: "I'm working on it!"
         },
         {
-            title: "On digital craftsmanship",
+            title: "On digital craftsmanship (SOON)",
             previewImage: "/api/placeholder/400/300",
             additionalImages: [
                 "/api/placeholder/400/300",
                 "/api/placeholder/400/300"
             ],
-            description: "Detailed description of thought piece 2."
+            description: "I'm working on it!"
         },
         {
-            title: "The Zen of Computational Design",
+            title: "On natural materials in architecture (SOON)",
             previewImage: "/api/placeholder/400/300",
             additionalImages: [
                 "/api/placeholder/400/300",
                 "/api/placeholder/400/300"
             ],
-            description: "Detailed description of thought piece 2."
-        },
-        {
-            title: "On natural materials in architecture",
-            previewImage: "/api/placeholder/400/300",
-            additionalImages: [
-                "/api/placeholder/400/300",
-                "/api/placeholder/400/300"
-            ],
-            description: "Detailed description of thought piece 2."
+            description: "I'm working on it!"
         }
     ]
 };
