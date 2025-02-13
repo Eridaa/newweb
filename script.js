@@ -115,6 +115,13 @@ const projectData = {
     ],
     purposeless: [
         {
+            title: "<a href='letters.html'>LETTERS</a>",
+            previewImage: "/images/let.gif",
+            additionalImages: [
+                "/images/let.gif"
+            ],
+            description:  "<a href='letters.html'>LETTERS</a>"
+        },{
             title: "DLA",
             previewImage: "/images/g1.gif",
             additionalImages: [

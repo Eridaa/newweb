@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EB Letters</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #f0f0f0;
+            overflow: hidden;
+        }
+
+        #canvas-container {
+            flex: 1;
+            width:100%;
+            position: relative;
+        }
+
+        #footer {
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        button, select {
+            padding: 8px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: rgba(0, 0, 0, 0.2);
+            color: white;
+            backdrop-filter: blur(5px);
+            pointer-events: auto;
+        }
+
+        select {
+            appearance: none;
+            padding-right: 30px;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 12px auto;
+        }
+
+        button:hover, select:hover {
+            background: rgba(0, 0, 0, 0.3);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    <div id="footer">
+        <select id="styleSelect" onchange="updateStyle()">
+            <option value="01">01</option>
+            <option value="02">02</option>
+            <option value="03">03</option>
+            <option value="04">04</option>
+        </select>
+        <button onclick="clearCanvas()">Clear Canvas</button>
+    </div>
+    <script>
+        let points = [];
+        let isDrawing = false;
+        let currentStroke = [];
+        let time = 0;
+        let lastX, lastY;
+        let currentStyle = '01';
+
+        function setup() {
+            let canvas = createCanvas(windowWidth, windowHeight);
+            canvas.parent('canvas-container');
+            background(255);
+        }
+
+        function windowResized() {
+            resizeCanvas(windowWidth, windowHeight);
+            background(255);
+            
+            for (let stroke of points) {
+                for (let i = 1; i < stroke.length; i++) {
+                    let p1 = stroke[i-1];
+                    let p2 = stroke[i];
+                    line(p1.x, p1.y, p2.x, p2.y);
+                }
+            }
+        }
+
+        function draw() {
+            time += 0.05;
+        }
+
+        function updateStyle() {
+            currentStyle = document.getElementById('styleSelect').value;
+        }
+
+        function applyTransformation(x, y, prevX, prevY, index) {
+            let dx = x - prevX;
+            let dy = y - prevY;
+            let distance = sqrt(dx * dx + dy * dy);
+            let angle = atan2(dy, dx);
+            
+            switch(currentStyle) {
+                case '01':
+                let spiralAngle = time + index * PI/4;
+                let radius = index * 5;
+                return {
+                    x: x + cos(angle) * distance*radius,
+                    y: y + sin(angle) *distance,
+                    prevX: prevX + cos(angle) * distance,
+                    prevY: prevY + sin(angle) * distance
+                };
+                
+                case '02':
+                    let zigOffset = ((time + index * 0.5) % 2 < 1 ? 1 : -1) * 2;
+                    return {
+                        x: x + cos(angle + HALF_PI) *distance* zigOffset,
+                        y: y + sin(angle + HALF_PI) *distance*zigOffset,
+                        prevX: prevX + cos(angle + HALF_PI) *distance* zigOffset,
+                        prevY: prevY + sin(angle + HALF_PI) * zigOffset*distance
+                    };
+                
+                case '03':
+                let offset = sin(time + index * TWO_PI/3) * 5;
+                    return {
+                        x: y+ sin(angle + HALF_PI) * offset,
+                        y: x + cos(angle + HALF_PI) * offset,
+                        prevX: prevY + cos(angle + HALF_PI) * offset,
+                        prevY: prevX + sin(angle + HALF_PI) * offset
+                    };
+
+                case '04':
+                let offset1 = sin(time + index * TWO_PI/3) *0.2;
+                return {
+                    x: x-y + cos(angle + HALF_PI) * offset1,
+                    y: y-x + sin(angle + HALF_PI) * offset1,
+                    prevX: prevX + sin(angle + HALF_PI) * offset1,
+                    prevY: prevY + cos(angle + HALF_PI) * offset1
+                };
+            }
+        }
+
+        function mouseDragged() {
+            if (isDrawing) {
+                currentStroke.push({x: mouseX, y: mouseY});
+                
+                stroke(0);
+                strokeWeight(2);
+                
+                for (let i = 0; i < 5; i++) {
+                    let transformed = applyTransformation(mouseX, mouseY, lastX, lastY, i);
+                    line(transformed.prevX, transformed.prevY, transformed.x, transformed.y);
+                }
+                
+                lastX = mouseX;
+                lastY = mouseY;
+            }
+        }
+
+        function mousePressed() {
+            if (mouseX > 0 && mouseX < width && mouseY > 0 && mouseY < height) {
+                isDrawing = true;
+                currentStroke = [];
+                lastX = mouseX;
+                lastY = mouseY;
+            }
+        }
+
+        function mouseReleased() {
+            if (isDrawing) {
+                isDrawing = false;
+                points.push(currentStroke);
+            }
+        }
+
+        function clearCanvas() {
+            points = [];
+            background(255);
+        }
+    </script>
+</body>
+</html>
