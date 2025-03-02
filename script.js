@@ -10,12 +10,14 @@ const projectData = {
     }],
     architecture: [
         {
-            title: "Modulor: digital methods of representing human perception in spaces (SOON)",
-            previewImage: "/api/placeholder/400/300",
+            title: "<a href='modulor.html'>Modulor: digital methods of representing human perception in spaces</a>",
+            previewImage: "/images/mod1.gif",
             additionalImages: [
-                "/api/placeholder/400/300"
+                "/images/mod1.gif",
+                "/images/mod3.png",
+                "/images/mod4.png",
             ],
-            description: "I'm working on it!"
+            description: "<a href='modulor.html'>An endeavour to represent human scale in the digital.</a>"
         },
         {
             title: "Where is the Wind blowing from?",
