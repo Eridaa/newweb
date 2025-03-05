@@ -14,8 +14,7 @@ const projectData = {
             previewImage: "/images/mod1.gif",
             additionalImages: [
                 "/images/mod1.gif",
-                "/images/mod3.png",
-                "/images/mod4.png",
+                "/images/mod2.gif"
             ],
             description: "<a href='modulor.html'>An endeavour to represent human scale in the digital.</a>"
         },
