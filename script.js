@@ -193,13 +193,12 @@ const projectData = {
             description: "I'm working on it!"
         },
         {
-            title: "On natural materials in architecture (SOON)",
-            previewImage: "/api/placeholder/400/300",
+            title: "On natural materials in architecture",
+            previewImage: "/images/mat.png",
             additionalImages: [
-                "/api/placeholder/400/300",
-                "/api/placeholder/400/300"
+                "/images/mat.png"
             ],
-            description: "I'm working on it!"
+            description: "<a href='materials.html'>An exploration current examples of the use of natural materials in architecture.</a>"
         }
     ]
 };
