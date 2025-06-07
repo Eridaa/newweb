@@ -175,22 +175,12 @@ const projectData = {
     ],
     thoughts: [
         {
-            title: "On architectural representations: how to design without drawing walls. (SOON)",
-            previewImage: "/api/placeholder/400/300",
+            title: "On Simulating in Architecture",
+            previewImage: "/images/sim.jpg",
             additionalImages: [
-                "/api/placeholder/400/300",
-                "/api/placeholder/400/300"
+                "/images/sim.jpg"
             ],
-            description: "I'm working on it!"
-        },
-        {
-            title: "On digital craftsmanship (SOON)",
-            previewImage: "/api/placeholder/400/300",
-            additionalImages: [
-                "/api/placeholder/400/300",
-                "/api/placeholder/400/300"
-            ],
-            description: "I'm working on it!"
+            description: "<a href='simulation.html'>An essay about extending current simulation methods in architecture.</a>"
         },
         {
             title: "On natural materials in architecture",
@@ -198,7 +188,7 @@ const projectData = {
             additionalImages: [
                 "/images/mat.png"
             ],
-            description: "<a href='materials.html'>An exploration current examples of the use of natural materials in architecture.</a>"
+            description: "<a href='materials.html'>An exploration on current examples of the use of natural materials in architecture.</a>"
         }
     ]
 };
