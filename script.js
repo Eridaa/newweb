@@ -71,8 +71,10 @@ const projectData = {
             title: "Studies for a Lego Kit",
             previewImage: "/images/le2.jpg",
             additionalImages: [
-                "/images/le1.jpg",
-                "/images/le2.jpg"
+                "/images/le2.jpg",
+                "/images/lego01.png",
+                "/images/lego02.png",
+                "/images/lego03.png",
             ],
             description: "<b>3d printed PLA</b>"
         },/*
@@ -189,6 +191,14 @@ const projectData = {
                 "/images/mat.png"
             ],
             description: "<a href='materials.html'>An exploration on current examples of the use of natural materials in architecture.</a>"
+        },
+        {
+            title: "Personal Revelations about the Built Environment",
+            previewImage: "/images/noschool.png",
+            additionalImages: [
+                "/images/noschool.png"
+            ],
+            description: "<a href='noschool.html'>Slides of my presentation at NØ School Nevers 2025.</a>"
         }
     ]
 };
