@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>On Digital Sketching</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <style>
+        .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #f0f0f0;
+            overflow: hidden;
+        }
+
+        #canvas-container {
+            flex: 1;
+            width:100%;
+            position: relative;
+        }
+
+        #footer {
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        button, select {
+            padding: 8px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            font-size: 80%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: rgba(0, 0, 0, 0.2);
+            color: white;
+            backdrop-filter: blur(5px);
+            pointer-events: auto;
+        }
+
+        select {
+            appearance: none;j
+            padding-right: 30px;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 12px auto;
+        }
+
+        button:hover, select:hover {
+            background: rgba(0, 0, 0, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .popup {
+            padding: 20px;
+            border-radius: 5px;
+            position: relative;
+            width: 50%;
+            height: 50%;
+            font-size: 180%;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay" id="popup">
+    <div class="popup">
+        <h3>Drawings allow one to step back, to observe and attain an understanding of what is not yet there but is beginning to emerge. </h3><br>
+        <p>Peter Zumthor, Architektur Denken</p>
+    </div>
+    </div>
+    <div id="canvas-container"></div>
+    <div id="footer">
+        <select id="styleSelect" onchange="updateStyle()">
+            <option value="02">Magnetic</option>
+            <option value="01">Not my intention</option>
+            <option value="03">Works with a keyboard</option>
+        </select>
+        <button onclick="clearCanvas()">Clear Canvas</button>
+    </div>
+    <script>
+        function closePopup() {
+        document.getElementById('popup').style.display = 'none';
+        }
+
+        
+        let allStrokes = [];
+        
+        let currentLine = [];
+        let lines = [];
+        let pushRadius = 200;
+        let pushForce = 2;
+
+        let points = [];
+        let isDrawing = false;
+        let currentStroke = [];
+        let time = 0;
+        let lastX, lastY;
+        let currentStyle = '02';
+
+        
+        function updateStyle() {
+            currentStyle = document.getElementById('styleSelect').value;
+        }
+
+        //#region keys
+        let currentPos = { x: 0, y: 0 };
+        let centerX, centerY;
+        let pressedKeys = new Set();
+        let lastDrawPos = { x: 0, y: 0 };
+        let lines3 = [];
+        let speed = 2; // Movement speed multiplier
+        
+        // Define keyboard layout for vector calculation
+        const keyboardLayout = [
+            ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+            ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
+            ['z', 'x', 'c', 'v', 'b', 'n', 'm']
+        ];
+        
+        // Find position of a key in the layout
+        function getKeyPosition(key) {
+            for (let row = 0; row < keyboardLayout.length; row++) {
+                for (let col = 0; col < keyboardLayout[row].length; col++) {
+                    if (keyboardLayout[row][col] === key.toLowerCase()) {
+                        return { row, col };
+                    }
+                }
+            }
+            return null;
+        }
+        
+        // Calculate vector for a key relative to D and K
+        function getKeyVector(key) {
+            const keyPos = getKeyPosition(key);
+            if (!keyPos) return { x: 0, y: 0 };
+            
+            // D and K are center points with (0,0) vectors
+            if (key.toLowerCase() === 'd' || key.toLowerCase() === 'k') {
+                return { x: 0, y: 0 };
+            }
+            
+            // D is at row 1, col 2 and K is at row 1, col 7
+            const dPos = { row: 1, col: 2 };
+            const kPos = { row: 1, col: 7 };
+            
+            // Calculate distance to D and K
+            const distToD = Math.sqrt(Math.pow(keyPos.row - dPos.row, 2) + Math.pow(keyPos.col - dPos.col, 2));
+            const distToK = Math.sqrt(Math.pow(keyPos.row - kPos.row, 2) + Math.pow(keyPos.col - kPos.col, 2));
+            
+            // Use the nearest center (D or K)
+            let centerPos;
+            if (distToD <= distToK) {
+                centerPos = dPos; // Use D as center
+            } else {
+                centerPos = kPos; // Use K as center
+            }
+            
+            // Calculate vector from the nearest center
+            const vectorX = (keyPos.col - centerPos.col) * 40; // Scale factor
+            const vectorY = (keyPos.row - centerPos.row) * 40;
+            
+            return { x: vectorX, y: vectorY };
+        }
+        
+        function setup() {
+            let canvas = createCanvas(windowWidth, windowHeight);
+            canvas.parent('canvas-container');
+
+            switch(currentStyle) {
+                case '01':
+                    allStrokes = []    
+                    return;
+                case '02':
+                    currentLine = []    
+                    strokeWeight(2);
+                    return; 
+                case '03':
+                    centerX = width / 2;
+                    centerY = height / 2;
+                    currentPos = { x: centerX, y: centerY };
+                    lastDrawPos = { x: centerX, y: centerY };
+                    return;
+
+                    
+            }
+        }
+        
+        function draw() {
+            
+            switch(currentStyle) {
+                case '01':
+                    background(240);
+                    stroke(100, 200, 255, 180);
+                    // Draw all completed strokes
+                    for (let stroke of allStrokes) {
+                        beginShape();
+                        noFill();
+                        for (let point of stroke) {
+                            vertex(point.x, point.y);
+                        }
+                        endShape();
+                    }
+                    
+                    // Draw current stroke being drawn
+                    if (currentStroke.length > 1) {
+                        beginShape();
+                        noFill();
+                        for (let point of currentStroke) {
+                            vertex(point.x, point.y);
+                        }
+                        endShape();
+                    }
+                    return;
+                case '02':
+                    if(isDrawing)
+                        background(240, 25); // Slight fade effect
+                    // Draw all existing lines
+                    stroke(100, 200, 255, 180);
+                    for (let line of lines) {
+                        beginShape();
+                        noFill();
+                        for (let point of line) {
+                            vertex(point.x, point.y);
+                        }
+                        endShape();
+                    }
+                    
+                    // Draw current line being drawn
+                    if (currentLine.length > 1) {
+                        stroke(255, 150, 100, 255);
+                        strokeWeight(3);
+                        beginShape();
+                        noFill();
+                        for (let point of currentLine) {
+                            vertex(point.x, point.y);
+                        }
+                        endShape();
+                        strokeWeight(2);
+                    }
+                    
+                    // Show push radius when drawing
+                    if (isDrawing && currentLine.length > 0) {
+                        stroke(255, 255, 255, 50);
+                        strokeWeight(1);
+                        noFill();
+                        let lastPoint = currentLine[currentLine.length - 1];
+                        ellipse(lastPoint.x, lastPoint.y, pushRadius * 2);
+                        strokeWeight(2);
+                    }
+                    return; 
+                case '03':
+                    background(240);
+                    
+                    // Calculate combined vector from all pressed keys
+                    let combinedVector = { x: 0, y: 0 };
+                    for (let key of pressedKeys) {
+                        if (key !== ' ') { // Ignore space key
+                            const vector = getKeyVector(key);
+                            combinedVector.x += vector.x;
+                            combinedVector.y += vector.y;
+                        }
+                    }
+                    
+                    // Apply movement if there are pressed keys
+                    if (pressedKeys.size > 0 && !pressedKeys.has(' ') || (pressedKeys.size > 1 && pressedKeys.has(' '))) {
+                        currentPos.x += combinedVector.x * speed * 0.016; // Normalize for ~60fps
+                        currentPos.y += combinedVector.y * speed * 0.016;
+                        
+                        // Keep point within canvas bounds
+                        currentPos.x = constrain(currentPos.x, 10, width - 10);
+                        currentPos.y = constrain(currentPos.y, 10, height - 10);
+                    }
+                    
+                    // Draw all stored lines
+                    stroke(50, 100, 200);
+                    strokeWeight(2);
+                    for (let line of lines3) {
+                        for (let i = 1; i < line.length; i++) {
+                            line2d(line[i-1].x, line[i-1].y, line[i].x, line[i].y);
+                        }
+                    }
+                    
+                    // Draw current line if drawing
+                    if (isDrawing && lines3.length > 0) {
+                        let currentLine = lines3[lines3.length - 1];
+                        if (currentLine.length > 1) {
+                            stroke(20, 150, 20);
+                            strokeWeight(3);
+                            for (let i = 1; i < currentLine.length; i++) {
+                                line2d(currentLine[i-1].x, currentLine[i-1].y, currentLine[i].x, currentLine[i].y);
+                            }
+                        }
+                    }
+                    
+                    
+                    // Draw current cursor position
+                    fill(200, 150, 0);
+                    noStroke();
+                    circle(currentPos.x, currentPos.y, 12);
+                    
+                    // Update drawing line if space is held and cursor moved
+                    if (isDrawing && lines3.length > 0) {
+                        let currentLine = lines3[lines3.length - 1];
+                        let distance = dist(currentPos.x, currentPos.y, lastDrawPos.x, lastDrawPos.y);
+                        
+                        if (distance > 1) { // Only add point if moved enough
+                            currentLine.push({ x: currentPos.x, y: currentPos.y });
+                            lastDrawPos = { x: currentPos.x, y: currentPos.y };
+                        }
+                    }
+                    return;
+                    
+                }
+        }
+
+        function mousePressed() {
+            
+            
+            switch(currentStyle) {
+                case '01':
+                    if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
+                        isDrawing = true;
+                        currentStroke = [];
+                        currentStroke.push({x: mouseX, y: mouseY});
+                    }
+                case '02':
+                    isDrawing = true;
+                    currentLine = [];
+                    currentLine.push({x: mouseX, y: mouseY});
+                case '03':
+            }
+        }
+
+        function mouseDragged() {
+            switch(currentStyle) {
+                case '01':
+                    if (isDrawing ) {
+                        currentStroke.push({x: mouseX, y: mouseY});
+                    }
+                case '02':
+                    if (isDrawing) {
+                        let newPoint = {x: mouseX, y: mouseY};
+                        currentLine.push(newPoint);
+                        
+                        // Apply force to existing lines
+                        applyForceToLines(newPoint);
+                    }
+                case '03':
+                    return;
+            }
+        }
+        
+        function mouseReleased() {
+            switch(currentStyle) {
+                case '01':
+                    if (isDrawing && currentStroke.length > 1) {
+                        // Randomly delete parts of the line
+                        let processedStroke = randomlyDeleteParts(currentStroke);
+                        
+                        // Add the processed stroke to our collection
+                        if (processedStroke.length > 1) {
+                            allStrokes.push(processedStroke);
+                        }
+                        
+                        currentStroke = [];
+                        isDrawing = false;
+                    }
+                case '02':
+                    if (isDrawing && currentLine.length > 1) {
+                        lines.push([...currentLine]);
+                    }
+                    isDrawing = false;
+                    currentLine = [];
+                case '03':
+                    return;
+            }
+        }
+
+        function applyForceToLines(newPoint) {
+            for (let line of lines) {
+                for (let point of line) {
+                    let distance = dist(newPoint.x, newPoint.y, point.x, point.y);
+                    
+                    if (distance < pushRadius && distance > 0) {
+                        // Calculate push direction (away from new point)
+                        let angle = atan2(point.y - newPoint.y, point.x - newPoint.x);
+                        
+                        // Calculate force strength (stronger when closer)
+                        let forceStrength = map(distance, 0, pushRadius, pushForce, 0);
+                        
+                        // Apply force
+                        point.x += cos(angle) * forceStrength;
+                        point.y += sin(angle) * forceStrength;
+                        
+                        // Keep points within canvas bounds
+                        point.x = constrain(point.x, 0, width);
+                        point.y = constrain(point.y, 0, height);
+                    }
+                }
+            }
+        }
+
+        function randomlyDeleteParts(stroke) {
+            //if (stroke.length < 3) return stroke;
+            
+            let newStroke = [];
+            let deletionProbability = 0.7; // 30% chance to delete each segment
+            let minKeepLength = 3; // Minimum consecutive points to keep
+            
+            let i = 0;
+            while (i < stroke.length) {
+                if (random() > deletionProbability) {
+                    // Keep this segment
+                    let segmentLength = random(minKeepLength, min(15, stroke.length - i));
+                    segmentLength = floor(segmentLength);
+                    
+                    for (let j = 0; j < segmentLength && i + j < stroke.length; j++) {
+                        newStroke.push(stroke[i + j]);
+                    }
+                    i += segmentLength;
+                } else {
+                    // Delete this segment
+                    let deleteLength = random(2, 8);
+                    deleteLength = floor(deleteLength);
+                    i += deleteLength;
+                }
+            }
+            
+            return newStroke;
+        }
+        
+        function line2d(x1, y1, x2, y2) {
+            line(x1, y1, x2, y2);
+        }
+        //#endregion
+        function keyPressed() {
+            switch(currentStyle) {
+                case '01':
+                    return;
+                case '02':
+                    if (key === 'c' || key === 'C') {
+                        lines = [];
+                        background(240);
+                    }
+                    if (key === '+' || key === '=') {
+                        pushRadius = min(pushRadius + 10, 200);
+                    }
+                    if (key === '-' || key === '_') {
+                        pushRadius = max(pushRadius - 10, 20);
+                    }
+                    if (key === 'f' || key === 'F') {
+                        pushForce = pushForce === 0.5 ? 1.0 : 0.5;
+                    }
+                case '03':
+                    if (key === ' ') {
+                        if (!isDrawing) {
+                            isDrawing = true;
+                            lines3.push([{ x: currentPos.x, y: currentPos.y }]);
+                            lastDrawPos = { x: currentPos.x, y: currentPos.y };
+                        }
+                        return false; // Prevent page scroll
+                    } else if (key.match(/[a-zA-Z]/)) {
+                        pressedKeys.add(key.toLowerCase());
+                    }
+            }
+        }
+        
+        function keyReleased() {
+            switch(currentStyle) {
+                case '01':
+                    return;
+                case '02':
+                    return; 
+                case '03':
+                    if (key === ' ') {
+                        isDrawing = false;
+                    } else if (key.match(/[a-zA-Z]/)) {
+                        pressedKeys.delete(key.toLowerCase());
+                    }
+                }
+        }
+        
+        function windowResized() {
+            resizeCanvas(windowWidth, windowHeight);
+            switch(currentStyle) {
+                case '01':
+                    return;
+                case '02':
+                    return; 
+                case '03':
+                    centerX = width / 2;
+                    centerY = height / 2;
+            }
+        }
+        
+        
+        
+        function resetPosition() {
+            switch(currentStyle) {
+                case '01':
+                    return;
+                case '02':
+                    return; 
+                case '03':
+                    currentPos.x = centerX;
+                    currentPos.y = centerY;
+            }
+        }
+
+        function clearCanvas() {
+            points = [];
+            lines = [];
+            lines3 = [];
+            allStrokes = [];
+            currentStroke = [];
+            background(240);
+        }
+
+    </script>
+</body>
+</html>

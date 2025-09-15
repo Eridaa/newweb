@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EB Drawing</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        // Call keyIsDown continuously
+        setInterval(keyIsDown, 16); // ~60fps
+        
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #f8f9fa;
+            overflow: hidden;
+            font-family: 'Courier New', monospace;
+        }
+
+        #canvas-container {
+            flex: 1;
+            width: 100%;
+            position: relative;
+        }
+
+        #info {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: #333;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            font-size: 14px;
+            line-height: 1.4;
+            max-width: 300px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        #controls {
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        button {
+            padding: 8px 16px;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            backdrop-filter: blur(5px);
+            pointer-events: auto;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    <div id="info">
+        <strong>Vector Drawing App</strong><br>
+        • Press letters to move the cursor<br>
+        • D and K are center points (0,0)<br>
+        • Other letters use nearest center<br>
+        • Hold SPACE to draw lines<br>
+        • Multiple keys combine vectors<br>
+        <br>
+        <span id="status">Position: (0, 0)</span>
+    </div>
+    <div id="controls">
+        <button onclick="clearCanvas()">Clear Canvas</button>
+        <button onclick="resetPosition()">Reset Position</button>
+    </div>
+
+    <script>
+        let currentPos = { x: 0, y: 0 };
+        let centerX, centerY;
+        let pressedKeys = new Set();
+        let isDrawing = false;
+        let lastDrawPos = { x: 0, y: 0 };
+        let lines = [];
+        let speed = 2; // Movement speed multiplier
+        
+        // Define keyboard layout for vector calculation
+        const keyboardLayout = [
+            ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+            ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
+            ['z', 'x', 'c', 'v', 'b', 'n', 'm']
+        ];
+        
+        // Find position of a key in the layout
+        function getKeyPosition(key) {
+            for (let row = 0; row < keyboardLayout.length; row++) {
+                for (let col = 0; col < keyboardLayout[row].length; col++) {
+                    if (keyboardLayout[row][col] === key.toLowerCase()) {
+                        return { row, col };
+                    }
+                }
+            }
+            return null;
+        }
+        
+        // Calculate vector for a key relative to D and K
+        function getKeyVector(key) {
+            const keyPos = getKeyPosition(key);
+            if (!keyPos) return { x: 0, y: 0 };
+            
+            // D and K are center points with (0,0) vectors
+            if (key.toLowerCase() === 'd' || key.toLowerCase() === 'k') {
+                return { x: 0, y: 0 };
+            }
+            
+            // D is at row 1, col 2 and K is at row 1, col 7
+            const dPos = { row: 1, col: 2 };
+            const kPos = { row: 1, col: 7 };
+            
+            // Calculate distance to D and K
+            const distToD = Math.sqrt(Math.pow(keyPos.row - dPos.row, 2) + Math.pow(keyPos.col - dPos.col, 2));
+            const distToK = Math.sqrt(Math.pow(keyPos.row - kPos.row, 2) + Math.pow(keyPos.col - kPos.col, 2));
+            
+            // Use the nearest center (D or K)
+            let centerPos;
+            if (distToD <= distToK) {
+                centerPos = dPos; // Use D as center
+            } else {
+                centerPos = kPos; // Use K as center
+            }
+            
+            // Calculate vector from the nearest center
+            const vectorX = (keyPos.col - centerPos.col) * 40; // Scale factor
+            const vectorY = (keyPos.row - centerPos.row) * 40;
+            
+            return { x: vectorX, y: vectorY };
+        }
+        
+        function setup() {
+            let canvas = createCanvas(windowWidth, windowHeight);
+            canvas.parent('canvas-container');
+            
+            centerX = width / 2;
+            centerY = height / 2;
+            currentPos = { x: centerX, y: centerY };
+            lastDrawPos = { x: centerX, y: centerY };
+            
+            background(240);
+        }
+        
+        function draw() {
+            background(240);
+            
+            // Calculate combined vector from all pressed keys
+            let combinedVector = { x: 0, y: 0 };
+            for (let key of pressedKeys) {
+                if (key !== ' ') { // Ignore space key
+                    const vector = getKeyVector(key);
+                    combinedVector.x += vector.x;
+                    combinedVector.y += vector.y;
+                }
+            }
+            
+            // Apply movement if there are pressed keys
+            if (pressedKeys.size > 0 && !pressedKeys.has(' ') || (pressedKeys.size > 1 && pressedKeys.has(' '))) {
+                currentPos.x += combinedVector.x * speed * 0.016; // Normalize for ~60fps
+                currentPos.y += combinedVector.y * speed * 0.016;
+                
+                // Keep point within canvas bounds
+                currentPos.x = constrain(currentPos.x, 10, width - 10);
+                currentPos.y = constrain(currentPos.y, 10, height - 10);
+            }
+            
+            // Draw all stored lines
+            stroke(50, 100, 200);
+            strokeWeight(2);
+            for (let line of lines) {
+                for (let i = 1; i < line.length; i++) {
+                    line2d(line[i-1].x, line[i-1].y, line[i].x, line[i].y);
+                }
+            }
+            
+            // Draw current line if drawing
+            if (isDrawing && lines.length > 0) {
+                let currentLine = lines[lines.length - 1];
+                if (currentLine.length > 1) {
+                    stroke(20, 150, 20);
+                    strokeWeight(3);
+                    for (let i = 1; i < currentLine.length; i++) {
+                        line2d(currentLine[i-1].x, currentLine[i-1].y, currentLine[i].x, currentLine[i].y);
+                    }
+                }
+            }
+            
+            // Draw current cursor position
+            fill(200, 150, 0);
+            noStroke();
+            circle(currentPos.x, currentPos.y, 12);
+            
+            // Update drawing line if space is held and cursor moved
+            if (isDrawing && lines.length > 0) {
+                let currentLine = lines[lines.length - 1];
+                let distance = dist(currentPos.x, currentPos.y, lastDrawPos.x, lastDrawPos.y);
+                
+                if (distance > 1) { // Only add point if moved enough
+                    currentLine.push({ x: currentPos.x, y: currentPos.y });
+                    lastDrawPos = { x: currentPos.x, y: currentPos.y };
+                }
+            }
+            
+            // Update status
+            document.getElementById('status').textContent = 
+                `Position: (${Math.round(currentPos.x - centerX)}, ${Math.round(currentPos.y - centerY)})`;
+        }
+        
+        function drawGrid() {
+            // Grid function removed - no longer used
+        }
+        
+        function line2d(x1, y1, x2, y2) {
+            line(x1, y1, x2, y2);
+        }
+        
+        function keyPressed() {
+            if (key === ' ') {
+                if (!isDrawing) {
+                    isDrawing = true;
+                    lines.push([{ x: currentPos.x, y: currentPos.y }]);
+                    lastDrawPos = { x: currentPos.x, y: currentPos.y };
+                }
+                return false; // Prevent page scroll
+            } else if (key.match(/[a-zA-Z]/)) {
+                pressedKeys.add(key.toLowerCase());
+            }
+        }
+        
+        function keyReleased() {
+            if (key === ' ') {
+                isDrawing = false;
+            } else if (key.match(/[a-zA-Z]/)) {
+                pressedKeys.delete(key.toLowerCase());
+            }
+        }
+        
+        function windowResized() {
+            resizeCanvas(windowWidth, windowHeight);
+            centerX = width / 2;
+            centerY = height / 2;
+        }
+        
+        function clearCanvas() {
+            lines = [];
+            background(240);
+        }
+        
+        function toggleGrid() {
+            // Grid toggle function removed - no longer used
+        }
+        
+        function resetPosition() {
+            currentPos.x = centerX;
+            currentPos.y = centerY;
+        }
+    </script>
+</body>
+</html>

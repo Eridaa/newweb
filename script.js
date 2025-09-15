@@ -10,6 +10,14 @@ const projectData = {
     }],
     architecture: [
         {
+            title: "<a href='drawing.html'>DRAWING</a>",
+            previewImage: "/images/let.gif",
+            additionalImages: [
+                "/images/let.gif"
+            ],
+            description:  "<a href='drawing.html'>DRAWING</a>"
+        },
+        {
             title: "<a href='modulor.html'>Modulor: digital methods of representing human perception in spaces</a>",
             previewImage: "/images/mod1.gif",
             additionalImages: [
@@ -59,6 +67,14 @@ const projectData = {
     ],
     design: [
         {
+            title: "<a href='sketching.html'>On Digital Sketching</a>",
+            previewImage: "/images/mag.gif",
+            additionalImages: [
+                "/images/mag.gif"
+            ],
+            description:  "<a href='sketching.html'>On Digital Sketching</a>"
+        },
+        {
             title: "A 'feminist' chess set",
             previewImage: "/images/ch1.jpg",
             additionalImages: [
@@ -77,16 +93,7 @@ const projectData = {
                 "/images/lego03.png",
             ],
             description: "<b>3d printed PLA</b>"
-        },/*
-        {
-            title: "How to find time",
-            previewImage: "/api/placeholder/400/300",
-            additionalImages: [
-                "/api/placeholder/400/300",
-                "/api/placeholder/400/300"
-            ],
-            description: "<b>3d printed PLA</b>"
-        },*/
+        },
         {
             title: "Time",
             previewImage: "/images/t1.jpg",
@@ -124,7 +131,8 @@ const projectData = {
                 "/images/let.gif"
             ],
             description:  "<a href='letters.html'>LETTERS</a>"
-        },{
+        },
+        {
             title: "DLA",
             previewImage: "/images/g1.gif",
             additionalImages: [
